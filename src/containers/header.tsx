@@ -1,4 +1,6 @@
-import { useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 
 import {
   DropdownMenu,
@@ -8,23 +10,40 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, Copy, ExternalLink, Wallet } from "lucide-react";
+import {
+  useAppKitAccount,
+  useAppKitBalance,
+  useDisconnect,
+  useWalletInfo,
+} from "@reown/appkit/react";
+import { reownModal } from "@/components/ReownProvider";
 
 export default function Header() {
-  const [isConnected, setIsConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState("");
-  const [balance, setBalance] = useState("0");
+  const { walletInfo } = useWalletInfo();
+  const { address, isConnected } = useAppKitAccount();
+  const { disconnect } = useDisconnect();
+  const { fetchBalance } = useAppKitBalance();
 
-  const connectWallet = () => {
-    setIsConnected(true);
-    setWalletAddress("7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU");
-    setBalance("12.5");
+  const [balance, setBalance] =
+    useState<Awaited<ReturnType<typeof fetchBalance>>>();
+
+  useEffect(() => {
+    if (isConnected) {
+      fetchBalance().then(setBalance);
+    }
+  }, [isConnected]);
+
+  console.log(111, balance);
+
+  const connectWallet = async () => {
+    await reownModal.open({ view: "Connect" });
   };
 
-  const disconnectWallet = () => {
-    setIsConnected(false);
-    setWalletAddress("");
-    setBalance("0");
+  const disconnectWallet = async () => {
+    await disconnect();
+    // await reownModal.close();
   };
+
   return (
     <div className="mb-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -43,21 +62,35 @@ export default function Header() {
             <div className="flex items-center gap-3">
               <div className="text-right">
                 <div className="text-sm font-medium text-gray-900 dark:text-white">
-                  {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
+                  {address}
                 </div>
-                <div className="text-xs text-gray-500">{balance} SOL</div>
+                {balance?.isSuccess ? (
+                  <div className="text-xs text-gray-500">
+                    {balance.data?.balance} {balance.data?.symbol}
+                  </div>
+                ) : (
+                  <div>xxx</div>
+                )}
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="gap-2">
-                    <Wallet className="h-4 w-4" />
+                    {walletInfo?.icon ? (
+                      <img
+                        className="h-4 w-4"
+                        src={walletInfo?.icon}
+                        alt={walletInfo?.name}
+                      />
+                    ) : (
+                      <Wallet className="h-4 w-4" />
+                    )}
                     已连接
                     <ChevronDown className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
-                    onClick={() => navigator.clipboard.writeText(walletAddress)}
+                    onClick={() => navigator.clipboard.writeText(address!)}
                   >
                     <Copy className="h-4 w-4 mr-2" />
                     复制地址

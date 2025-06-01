@@ -16,6 +16,7 @@
     "@radix-ui/react-switch": "^1.2.5",
     "@radix-ui/react-tabs": "^1.1.12",
     "@reown/appkit": "^1.7.7",
+    "@reown/appkit-adapter-solana": "^1.7.7",
     "@reown/appkit-adapter-wagmi": "^1.7.7",
     "@tanstack/react-query": "^5.79.0",
     "class-variance-authority": "^0.7.1",

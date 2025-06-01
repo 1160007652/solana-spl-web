@@ -2,9 +2,9 @@
 
 import {
   wagmiAdapter,
-  wagmiConfig,
   projectId,
   networks,
+  solanaWeb3JsAdapter,
 } from "@/constants/reown-config";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAppKit } from "@reown/appkit/react";
@@ -13,8 +13,8 @@ import { cookieToInitialState, WagmiProvider } from "wagmi";
 
 const queryClient = new QueryClient();
 
-export const modal = createAppKit({
-  adapters: [wagmiAdapter],
+export const reownModal = createAppKit({
+  adapters: [wagmiAdapter, solanaWeb3JsAdapter],
   projectId,
   networks: networks,
   defaultNetwork: networks[0],
@@ -32,10 +32,13 @@ function ReownProvider({
   children: React.ReactNode;
   cookies: string | null;
 }) {
-  const initialState = cookieToInitialState(wagmiConfig, cookies);
+  const initialState = cookieToInitialState(wagmiAdapter.wagmiConfig, cookies);
 
   return (
-    <WagmiProvider config={wagmiConfig} initialState={initialState}>
+    <WagmiProvider
+      config={wagmiAdapter.wagmiConfig}
+      initialState={initialState}
+    >
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </WagmiProvider>
   );
