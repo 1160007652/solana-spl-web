@@ -41,7 +41,6 @@ export default function Header() {
 
   const disconnectWallet = async () => {
     await disconnect();
-    // await reownModal.close();
   };
 
   return (

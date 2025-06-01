@@ -4,6 +4,7 @@ import ReownProvider from "@/components/ReownProvider";
 import { headers } from "next/headers";
 
 import "./globals.css";
+import Header from "@/containers/header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,14 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ReownProvider cookies={cookies}>{children}</ReownProvider>
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+          <div className="container mx-auto p-6">
+            <ReownProvider cookies={cookies}>
+              <Header />
+              {children}
+            </ReownProvider>
+          </div>
+        </div>
       </body>
     </html>
   );
