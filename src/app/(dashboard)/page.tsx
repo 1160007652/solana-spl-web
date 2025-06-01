@@ -1,6 +1,5 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
 import { KeyRound, Coins, Settings, FileCode } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,20 +11,10 @@ import ContentTips from "@/containers/content-tips";
 import { useAppKitAccount } from "@reown/appkit/react";
 
 export default function Home() {
-  const [tabValue, setTabValue] = useState("wallet");
   const { isConnected } = useAppKitAccount();
 
-  useEffect(() => {
-    if (!isConnected) {
-      setTabValue("wallet-unconnect");
-    }
-  }, [isConnected]);
   return (
-    <Tabs
-      defaultValue={tabValue}
-      onValueChange={setTabValue}
-      className="w-full"
-    >
+    <Tabs value="wallet" className="w-full">
       <TabsList className="grid grid-cols-4 mb-8 gap-3">
         <TabsTrigger value="wallet" className="flex items-center gap-2">
           <KeyRound className="h-4 w-4" />
@@ -49,6 +38,8 @@ export default function Home() {
         </TabsTrigger>
       </TabsList>
 
+      {!isConnected && <ContentTips />}
+
       <TabsContent value="wallet">
         <WalletModule isConnected={isConnected} />
       </TabsContent>
@@ -63,10 +54,6 @@ export default function Home() {
 
       <TabsContent value="contract">
         <ContractModule isConnected={isConnected} />
-      </TabsContent>
-
-      <TabsContent value="wallet-unconnect">
-        <ContentTips />
       </TabsContent>
     </Tabs>
   );
