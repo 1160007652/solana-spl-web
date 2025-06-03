@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, Zap } from "lucide-react";
+import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -19,9 +18,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAppKitAccount } from "@reown/appkit/react";
+import { useAppKitConnection } from "@reown/appkit-adapter-solana/react";
+import { useState } from "react";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 
 export default function AirdropSol() {
-  const { isConnected } = useAppKitAccount();
+  const [amount, setAmount] = useState<string>("1");
+  const { isConnected, address } = useAppKitAccount();
+  const { connection } = useAppKitConnection();
+
+  async function handleClickAirdrop() {
+    try {
+      if (!connection || !address) return;
+      const signature = await connection.requestAirdrop(
+        new PublicKey(address),
+        Number(BigInt(amount) * BigInt(LAMPORTS_PER_SOL))
+      );
+      // await connection.confirmTransaction(signature);
+    } catch (error) {
+      console.error("Airdrop failed:", error);
+    }
+  }
   return (
     <Card>
       <CardHeader>
@@ -34,31 +51,24 @@ export default function AirdropSol() {
       <CardContent>
         <div className="space-y-4">
           <div className="flex flex-row gap-4">
-            <div className="w-24 space-y-2">
-              <Label htmlFor="faucetAmount">领取数量</Label>
-              <Select defaultValue="1">
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="选择数量" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 SOL</SelectItem>
-                  <SelectItem value="2">2 SOL</SelectItem>
-                  <SelectItem value="5">5 SOL</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex-1 space-y-2">
-              <Label htmlFor="faucetAddress">接收地址</Label>
-              <Input
-                id="faucetAddress"
-                placeholder="输入接收地址"
-                value={""}
-                disabled={!isConnected}
-              />
-            </div>
+            <Label htmlFor="faucetAmount">领取数量</Label>
+            <Select value={amount} onValueChange={setAmount}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="选择数量" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1 SOL</SelectItem>
+                <SelectItem value="2">2 SOL</SelectItem>
+                <SelectItem value="5">5 SOL</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <Button className="w-full" disabled={!isConnected}>
+          <Button
+            className="w-full"
+            disabled={!isConnected}
+            onClick={handleClickAirdrop}
+          >
             <Zap className="h-4 w-4 mr-2" />
             领取测试币
           </Button>

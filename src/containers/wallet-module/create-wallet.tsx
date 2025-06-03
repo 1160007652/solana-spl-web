@@ -9,20 +9,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useAppKitAccount } from "@reown/appkit/react";
+import { Keypair } from "@solana/web3.js";
+import { useState } from "react";
 
 export default function CreateWallet() {
-  const { isConnected } = useAppKitAccount();
+  const [wallets, setWallets] = useState<Keypair[]>([]);
+  async function handleClickCreateKeypair() {
+    const keypair = await Keypair.generate();
+    setWallets([...wallets, keypair]);
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -33,15 +29,33 @@ export default function CreateWallet() {
         <CardDescription>生成新的 Solana 钱包地址</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="walletName">钱包名称</Label>
-          <Input id="walletName" placeholder="我的钱包" />
-        </div>
-
-        <Button className="w-full">
+        <Button className="w-full" onClick={handleClickCreateKeypair}>
           <Plus className="h-4 w-4 mr-2" />
           生成钱包
         </Button>
+
+        {wallets.map((wallet, index) => {
+          return (
+            <div key={index} className="space-y-2 p-4 rounded-lg border">
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">
+                  钱包地址
+                </div>
+                <div className="font-mono break-all">
+                  {wallet.publicKey.toBase58()}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">
+                  私钥
+                </div>
+                <div className="font-mono break-all">
+                  {Buffer.from(wallet.secretKey).toString("base64")}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </CardContent>
     </Card>
   );
