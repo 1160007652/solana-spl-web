@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import ReownProvider from "@/components/ReownProvider";
 import { headers } from "next/headers";
 
+import "@reown/appkit-wallet-button/react";
+
 import "./globals.css";
 import Header from "@/containers/header";
 

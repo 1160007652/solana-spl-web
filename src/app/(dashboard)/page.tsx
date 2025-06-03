@@ -41,7 +41,7 @@ export default function Home() {
       {!isConnected && <ContentTips />}
 
       <TabsContent value="wallet">
-        <WalletModule isConnected={isConnected} />
+        <WalletModule />
       </TabsContent>
 
       <TabsContent value="spl-token">

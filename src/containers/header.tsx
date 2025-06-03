@@ -13,13 +13,16 @@ import { ChevronDown, Copy, ExternalLink, Wallet } from "lucide-react";
 import {
   useAppKitAccount,
   useAppKitBalance,
+  useAppKitNetwork,
   useDisconnect,
   useWalletInfo,
 } from "@reown/appkit/react";
 import { reownModal } from "@/components/ReownProvider";
+import SwitchNetwork from "./switch-network";
 
 export default function Header() {
   const { walletInfo } = useWalletInfo();
+  const { caipNetworkId } = useAppKitNetwork();
   const { address, isConnected } = useAppKitAccount();
   const { disconnect } = useDisconnect();
   const { fetchBalance } = useAppKitBalance();
@@ -28,10 +31,10 @@ export default function Header() {
     useState<Awaited<ReturnType<typeof fetchBalance>>>();
 
   useEffect(() => {
-    if (isConnected) {
+    if (isConnected && caipNetworkId && address) {
       fetchBalance().then(setBalance);
     }
-  }, [isConnected]);
+  }, [isConnected, caipNetworkId, address]);
 
   console.log(111, balance);
 
@@ -71,6 +74,10 @@ export default function Header() {
                   <div>xxx</div>
                 )}
               </div>
+              <SwitchNetwork nativeUI />
+              <Button>
+                <appkit-network-button />
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="gap-2">
