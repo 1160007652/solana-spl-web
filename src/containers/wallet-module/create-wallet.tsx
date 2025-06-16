@@ -41,6 +41,21 @@ export default function CreateWallet() {
       keypair.privateKey
     );
 
+    /**
+     *
+     * 为什么使用privatekey.slice(-32)？
+     * 1. PKCS8格式的特点 ：当使用 crypto.subtle.exportKey("pkcs8", keypair.privateKey) 导出私钥时，
+     *    得到的是PKCS8格式的私钥。这种格式包含了额外的元数据和头信息，而不仅仅是原始的私钥数据。
+     * 2. 提取实际私钥 ： slice(-32) 操作是为了从PKCS8格式中提取出最后32字节的数据，这才是Ed25519算法中实际的私钥部分。
+     *    Ed25519私钥正好是32字节长度。
+     *
+     *
+     * 为什么需要进行私钥公钥拼接，作为完整的钱包私钥使用？
+     *   在Solana生态系统中，完整的密钥对通常表示为64字节的数据，其中：
+     *   [ 前32字节是-私钥 , 后32字节是-公钥 ]
+     *   兼容性考虑 ：这种格式与Solana的标准工具和库兼容，例如 @solana/web3.js 中的 Keypair 类就期望这种格式。
+     *   一体化存储 ：将私钥和公钥拼接在一起，可以在一个字符串中完整保存密钥对信息，便于后续使用。
+     */
     const privateBase58 = base58
       .decode(
         Uint8Array.from([
