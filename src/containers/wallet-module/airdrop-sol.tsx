@@ -19,22 +19,34 @@ import {
 } from "@/components/ui/select";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useAppKitConnection } from "@reown/appkit-adapter-solana/react";
-import { useState } from "react";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { useAppKitNetwork } from "@reown/appkit/react";
+import { useState, useEffect } from "react";
+
+import { address, createSolanaRpc, lamports } from "@solana/kit";
+
+const LAMPORTS_PER_SOL = 1_000_000_000;
 
 export default function AirdropSol() {
   const [amount, setAmount] = useState<string>("1");
-  const { isConnected, address } = useAppKitAccount();
+  const { isConnected, address: account } = useAppKitAccount();
   const { connection } = useAppKitConnection();
+  const { caipNetwork } = useAppKitNetwork();
 
   async function handleClickAirdrop() {
     try {
-      if (!connection || !address) return;
-      const signature = await connection.requestAirdrop(
-        new PublicKey(address),
-        Number(BigInt(amount) * BigInt(LAMPORTS_PER_SOL))
-      );
-      // await connection.confirmTransaction(signature);
+      if (!connection || !account) return;
+
+      const rpc = createSolanaRpc(connection.rpcEndpoint);
+      // const rpc = createSolanaRpc("https://api.testnet.solana.com");
+
+      let airdropAmt = lamports(BigInt(Number(amount) * LAMPORTS_PER_SOL));
+      const signature = await rpc
+        .requestAirdrop(address(account), airdropAmt, {
+          commitment: "confirmed",
+        })
+        .send();
+      console.log(signature);
+      console.log(`成功空投 ${amount} SOL 到账户 ${account}`);
     } catch (error) {
       console.error("Airdrop failed:", error);
     }
@@ -46,7 +58,7 @@ export default function AirdropSol() {
           <Zap className="h-5 w-5 text-amber-500" />
           领取测试币
         </CardTitle>
-        <CardDescription>从水龙头获取 Solana 测试网络代币</CardDescription>
+        <CardDescription>从水龙头获取 {caipNetwork?.name} 代币</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -66,12 +78,17 @@ export default function AirdropSol() {
 
           <Button
             className="w-full"
-            disabled={!isConnected}
+            disabled={!isConnected || !caipNetwork?.testnet}
             onClick={handleClickAirdrop}
           >
             <Zap className="h-4 w-4 mr-2" />
             领取测试币
           </Button>
+          {!caipNetwork?.testnet && (
+            <p className="text-red-500 text-sm mt-2">
+              主网不支持空投操作，请切换到测试网或开发网
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>
