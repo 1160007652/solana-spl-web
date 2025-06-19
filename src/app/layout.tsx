@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import ReownProvider from "@/components/ReownProvider";
 import { headers } from "next/headers";
+import { Toaster } from "@/components/ui/sonner";
 
 import "@reown/appkit-wallet-button/react";
 
@@ -40,6 +41,7 @@ export default async function RootLayout({
             <ReownProvider cookies={cookies}>
               <Header />
               {children}
+              <Toaster />
             </ReownProvider>
           </div>
         </div>

@@ -23,8 +23,7 @@ import { useAppKitNetwork } from "@reown/appkit/react";
 import { useState, useEffect } from "react";
 
 import { address, createSolanaRpc, lamports } from "@solana/kit";
-
-const LAMPORTS_PER_SOL = 1_000_000_000;
+import { LAMPORTS_PER_SOL } from "@/constants/solana-config";
 
 export default function AirdropSol() {
   const [amount, setAmount] = useState<string>("1");
