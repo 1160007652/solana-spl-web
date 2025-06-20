@@ -60,7 +60,12 @@ import {
 import { LAMPORTS_PER_SOL } from "@/constants/solana-config";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useWalletAccountTransactionSendingSigner } from "@solana/react";
-import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import {
+  PublicKey,
+  SystemProgram,
+  TransactionMessage,
+  VersionedTransaction,
+} from "@solana/web3.js";
 
 // 定义表单验证模式
 const formSchema = z.object({
@@ -173,19 +178,31 @@ export default function TransferSol() {
 
       const latestBlockhash = await connection.getLatestBlockhash();
 
-      const transaction = new Transaction({
-        feePayer: wallet,
+      const messageLegacy = new TransactionMessage({
+        payerKey: wallet,
         recentBlockhash: latestBlockhash?.blockhash,
-      }).add(
-        SystemProgram.transfer({
-          fromPubkey: wallet,
-          toPubkey: new PublicKey(values.recipient), // destination address
-          lamports: 1000,
-        })
+        instructions: [
+          SystemProgram.transfer({
+            fromPubkey: wallet,
+            toPubkey: new PublicKey(values.recipient), // destination address
+            lamports: 1000,
+          }),
+        ],
+      }).compileToV0Message();
+
+      const transation = new VersionedTransaction(messageLegacy);
+
+      const sig = await walletProvider.sendTransaction(transation, connection);
+
+      const signatureResult = await connection.confirmTransaction(
+        {
+          signature: sig,
+          ...latestBlockhash,
+        },
+        "confirmed"
       );
 
-      const sig = await walletProvider.sendTransaction(transaction, connection);
-      console.log(sig);
+      console.log(sig, signatureResult);
 
       // 显示成功消息
       toast.success(
